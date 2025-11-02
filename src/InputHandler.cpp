@@ -1,0 +1,103 @@
+#include "Constants.h"
+#include "InputHandler.h"
+
+#include <iostream>
+
+GameInput::GameInput(Game* pGame, Player* pPlayer) :
+    m_pGame(pGame), m_pPlayer(pPlayer)
+{
+}
+
+GameInput::~GameInput()
+{
+    
+}
+
+
+void GameInput::onKeyPressed(sf::Keyboard::Key key)
+{
+    if (key == sf::Keyboard::Up)
+    {
+        m_inputData.m_movingUp = true;
+    }
+    else if (key == sf::Keyboard::Down)
+    {
+        m_inputData.m_movingDown = true;
+    }
+    else if (key == sf::Keyboard::Left)
+    {
+        m_inputData.m_movingLeft = true;
+    }
+    else if (key == sf::Keyboard::Right)
+    {
+        m_inputData.m_movingRight = true;
+    }
+    else if (key == sf::Keyboard::Space)
+    {
+        m_inputData.m_space = true;
+    }
+	else if (key == sf::Keyboard::Enter)
+    {
+        m_inputData.m_enter = true;
+    }
+
+}
+
+void GameInput::onKeyReleased(sf::Keyboard::Key key)
+{
+    if (key == sf::Keyboard::Up)
+    {
+        m_inputData.m_movingUp = false;
+		m_inputData.m_upHold = false;
+    }
+    else if (key == sf::Keyboard::Down)
+    {
+        m_inputData.m_movingDown = false;
+		m_inputData.m_downHold = false;
+    }
+    else if (key == sf::Keyboard::Left)
+    {
+        m_inputData.m_movingLeft = false;
+    }
+    else if (key == sf::Keyboard::Right)
+    {
+        m_inputData.m_movingRight = false;
+    }
+    else if (key == sf::Keyboard::Space)
+    {
+        m_inputData.m_space = false;
+		m_inputData.m_spaceHold = false;
+    }
+	else if (key == sf::Keyboard::Enter)
+    {
+        m_inputData.m_enter = false;
+		m_inputData.m_enterHold = false;
+    }
+}
+
+bool GameInput::isEnterPressed()
+{
+	return false;
+}
+
+bool GameInput::isDownPressed()
+{
+	if (m_inputData.m_movingDown && !m_inputData.m_downHold)
+	{
+		m_inputData.m_downHold = true;
+		return true;
+	}
+
+	return false;
+}
+
+bool GameInput::isUpPressed()
+{
+	if (m_inputData.m_movingUp && !m_inputData.m_upHold)
+	{
+		m_inputData.m_upHold = true;
+		return true;
+	}
+
+	return false;
+}
