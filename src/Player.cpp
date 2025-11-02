@@ -14,12 +14,33 @@ Player::Player(Game* gamePtr)
 	m_shape.setOrigin({PlayerShapeRadius, PlayerShapeRadius});
 
 	m_pos = {300, ScreenHeight - FloorLevel - m_shape.getLocalBounds().height / 2};
+	m_prevPos = m_pos;
 	m_shape.setPosition(m_pos);
 
 	m_jumpLoadBar.setSize({0, 10});
 	m_jumpLoadBar.setFillColor(sf::Color::Red);
 	m_jumpLoadBar.setPosition({m_pos.x - TurboJumpBarLength / 2, m_pos.y - m_shape.getRadius() - m_jumpLoadBar.getSize().y - 15.f});
 }
+
+void Player::setPlayerGrounded(float posY, bool isOnPlatform, int platformIdx)
+{
+	if (m_isDownDashing)
+		m_gamePtr->activateCameraShake();
+
+	m_isJumping = false;
+	m_didDoubleJump = false;
+	m_isTurboJumping = false;
+	m_isDownDashing = false;
+	m_platformCollision = false;
+	if (m_shape.getFillColor() != PlayerColor)
+		m_shape.setFillColor(PlayerColor);
+
+	m_pos.y = posY;
+	m_isOnPlatform = isOnPlatform;
+	if (platformIdx != -1)
+		m_curPlatformIdx = platformIdx;
+}
+
 
 void Player::checkOutOfBounds()
 {
@@ -33,19 +54,9 @@ void Player::checkOutOfBounds()
 		m_pos.x = rightLimit;
 
 	// Grounded
-	if (m_pos.y > lowLimit)
+	if (m_pos.y >= lowLimit)
 	{
-		if (m_isDownDashing)
-			m_gamePtr->activateCameraShake();
-
-		m_isJumping = false;
-		m_didDoubleJump = false;
-		m_isTurboJumping = false;
-		m_isDownDashing = false;
-		m_shape.setOrigin({PlayerShapeRadius, PlayerShapeRadius});
-		if (m_shape.getFillColor() != PlayerColor)
-			m_shape.setFillColor(PlayerColor);
-		m_pos.y = lowLimit;
+		setPlayerGrounded(lowLimit);
 	}
 }
 
@@ -89,8 +100,9 @@ void Player::handleJump(float dt, InputData& inputData)
 	if (m_isTurboJumping && m_turboJumpEffectClock.getElapsedTime().asSeconds() > TurboJumpEffectTime)
 	{
 		m_isTurboJumping = false;
+		if (!m_isJumping)
+			m_velocity.y = PlayerJumpPower;
 		m_isJumping = true;
-		m_velocity.y = PlayerJumpPower;
 	}
 
 	if (!m_isJumping && !m_isTurboJumping && !m_isLoadingTurboJump && inputData.m_up)
@@ -153,7 +165,7 @@ void Player::handleDash(float dt, InputData& inputData)
 	{
 		m_isDownDashing = true;
 		m_shape.setFillColor(PlayerDashColor);
-		m_velocity.y = PlayerDashSpeed;
+		m_velocity.y = PlayerDownDashSpeed;
 	}
 	else if (checkCanDash(inputData))
 	{
@@ -170,13 +182,28 @@ void Player::handleDash(float dt, InputData& inputData)
 
 void Player::handleMovement(float deltaTime, InputData& inputData)
 {
-	if ((inputData.m_left || inputData.m_right) && !m_isDownDashing && !m_isDashing && !m_isLoadingTurboJump)
+
+	if (m_curPlatformIdx != -1)
+	{
+		if (m_gamePtr->getPlatformVec()[m_curPlatformIdx].isPlayerOOB(this))
+		{
+			m_isJumping = true;
+			m_curPlatformIdx = -1;
+		}
+	}
+
+	if ((inputData.m_left || inputData.m_right) && !m_isDownDashing && !m_isDashing && !m_isLoadingTurboJump && !m_platformCollision)
 	{
 		m_velocity.x = ((-1 * inputData.m_left) + inputData.m_right) * m_speed;
 	}
 	else if (!m_isDashing)
 	{
 		m_velocity.x = 0;
+	}
+
+	if (m_curPlatformIdx != -1)
+	{
+		m_velocity.x += m_gamePtr->getPlatformVec()[m_curPlatformIdx].getSpeed();
 	}
 
 	handleDash(deltaTime, inputData);
@@ -186,11 +213,14 @@ void Player::handleMovement(float deltaTime, InputData& inputData)
 		m_velocity.y = 0;
 	}
 
+	m_prevPos = m_pos;
+
 	m_pos.x += m_velocity.x * deltaTime;
 	m_pos.y += m_velocity.y * deltaTime;
 
 	checkOutOfBounds();
 	m_shape.setPosition(m_pos);
+
 }
 
 void Player::updateJumpLoadBar()

@@ -14,11 +14,15 @@ const float TurboJumpBarLength = 100.f;
 
 const float PlayerSpeed = 400.f;
 const float PlayerShapeRadius = 20.f;
-const float PlayerShapeMinRadius = 10.f;
 const float PlayerJumpPower = -700.f;
 const float PlayerDashSpeed = 1000.f;
+const float PlayerDownDashSpeed = 1300.f;
 const float PlayerDashTime = 0.15f;
 const float PlayerDashCooldown = 1.0f;
+
+const float PlatformInitSpawnTime = 3.0f;
+const float PlatformHeight = 20.f;
+const float PlatformSpeed = -200.f;
 
 const float DownDashMinHeight = ScreenHeight - FloorLevel - PlayerShapeRadius * 6;
 

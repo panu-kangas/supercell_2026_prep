@@ -1,0 +1,37 @@
+#pragma once
+
+#include <vector>
+#include "Platform.h"
+#include "Constants.h"
+
+class Game;
+class Player;
+
+class PlatformHandler
+{
+	public:
+
+	PlatformHandler() = delete;
+	PlatformHandler(Game* gamePtr);
+
+	void draw(sf::RenderTarget& target);
+	void update(float dt);
+	void checkPlayerCollision(Player* player);
+	std::vector<Platform>& getPlatformVec() { return m_platformVec; };
+
+	private:
+
+	void resolvePlayerCollison(int platformIdx, Player* player);
+	void spawnPlatform();
+
+	std::vector<Platform> m_platformVec;
+
+	Game* m_gamePtr;
+
+	sf::Clock m_spawnClock;
+	float m_spawnTime = PlatformInitSpawnTime;
+
+	std::pair<float, float> m_platformLengthLimits{100.f, 300.f};
+	std::pair<float, float> m_platformHeightLimits{200.f, ScreenHeight - FloorLevel - PlayerShapeRadius * 4};
+	
+};

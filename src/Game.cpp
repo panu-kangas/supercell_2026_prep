@@ -16,6 +16,7 @@ Game::Game(sf::RenderWindow& window) :
 
 {
     m_pGameInput = std::make_unique<GameInput>(this, m_pPlayer.get());
+	m_pPlatformHandler = std::make_unique<PlatformHandler>(this);
 }
 
 Game::~Game()
@@ -48,11 +49,14 @@ void Game::resetGame()
     
 }
 
+
 void Game::update(float deltaTime)
 {
     
-	
 	m_pPlayer->update(deltaTime, getInputData());
+
+	m_pPlatformHandler->update(deltaTime);
+	m_pPlatformHandler->checkPlayerCollision(m_pPlayer.get());
 
 	handleCameraShake();
 
@@ -84,7 +88,9 @@ void Game::update(float deltaTime)
 void Game::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
 	target.draw(m_floor);
+	m_pPlatformHandler->draw(target);
 	m_pPlayer->draw(target);
+
 }
 
 void Game::handleCameraShake()

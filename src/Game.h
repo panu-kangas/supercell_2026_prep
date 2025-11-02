@@ -5,6 +5,7 @@
 #include <memory>
 #include "Constants.h"
 #include "InputHandler.h"
+#include "PlatformHandler.h"
 
 
 class Player;
@@ -43,6 +44,7 @@ public:
 	InputData& getInputData() { return m_pGameInput->getInputData(); };
 	float getFloorY() {return m_floor.getPosition().y; };
 	sf::RenderWindow& getWindow() { return m_window; };
+	std::vector<Platform>& getPlatformVec() { return m_pPlatformHandler->getPlatformVec(); };
 
 private:
 
@@ -54,6 +56,7 @@ private:
 
     std::unique_ptr<GameInput> m_pGameInput;
 	std::unique_ptr<Player> m_pPlayer;
+	std::unique_ptr<PlatformHandler> m_pPlatformHandler;
 
 	sf::RectangleShape m_floor;
     sf::Font m_font;

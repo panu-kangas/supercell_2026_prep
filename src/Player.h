@@ -6,6 +6,7 @@
 #include "PlayerStatsInfoBox.h"
 
 class Game;
+class Platform;
 
 class Player
 {
@@ -18,7 +19,17 @@ class Player
 	void update(float deltaTime, InputData& inputData);
 
 	bool isLoadingTurboJump() { return m_isLoadingTurboJump; };
-	float getTurboJumpLoadTime() { return m_turboJumpLoadClock.getElapsedTime().asSeconds(); }; 
+	float getTurboJumpLoadTime() { return m_turboJumpLoadClock.getElapsedTime().asSeconds(); };
+
+	void setPosition(sf::Vector2f position) { m_pos = position; };
+	void setVelocity(sf::Vector2f velocity) { m_velocity = velocity; };
+	void setIsJumping(bool status) { m_isJumping = status; };
+	void setPlatformCollision(bool status) { m_platformCollision = status; };
+	void invertVelocity() { m_velocity.x *= -1; m_velocity.y *= -1; };
+	sf::CircleShape& getShape() { return m_shape; };
+	sf::Vector2f getPrevPos() { return m_prevPos; };
+	sf::Vector2f getCurPos() { return m_pos; };
+	void setPlayerGrounded(float posY, bool isOnPlatform = false, int platformIdx = -1);
 
 	private:
 
@@ -33,6 +44,7 @@ class Player
 
 	sf::CircleShape m_shape;
 	sf::Vector2f m_pos;
+	sf::Vector2f m_prevPos;
 	sf::Vector2f m_velocity;
 
 	bool m_isLoadingTurboJump = false;
@@ -41,6 +53,8 @@ class Player
 	bool m_isTurboJumping = false;
 	bool m_isDashing = false;
 	bool m_isDownDashing = false;
+	bool m_isOnPlatform = false;
+	bool m_platformCollision = false;
 
 	float m_speed = PlayerSpeed;
 	float m_jumpPower = PlayerJumpPower;
@@ -51,7 +65,10 @@ class Player
 	sf::Clock m_turboJumpLoadClock;
 	sf::Clock m_turboJumpEffectClock;
 
+	int m_curPlatformIdx = -1;
+
 //	PlayerStatsInfoBox m_infoBox;
 	sf::RectangleShape m_jumpLoadBar;
+
 
 };
