@@ -9,15 +9,16 @@ Player::Player(Game* gamePtr)
 
 	m_shape.setRadius(PlayerShapeRadius);
 	m_shape.setFillColor(PlayerColor);
+	m_shape.setOutlineColor(sf::Color::White);
+	m_shape.setOutlineThickness(0.f);
 	m_shape.setOrigin({PlayerShapeRadius, PlayerShapeRadius});
 
 	m_pos = {300, ScreenHeight - FloorLevel - m_shape.getLocalBounds().height / 2};
 	m_shape.setPosition(m_pos);
 
-	m_jumpLoadBar.setSize({0, 30});
+	m_jumpLoadBar.setSize({0, 10});
 	m_jumpLoadBar.setFillColor(sf::Color::Red);
-	m_jumpLoadBar.setPosition({100, 100});
-
+	m_jumpLoadBar.setPosition({m_pos.x - TurboJumpBarLength / 2, m_pos.y - m_shape.getRadius() - m_jumpLoadBar.getSize().y - 15.f});
 }
 
 void Player::checkOutOfBounds()
@@ -41,31 +42,11 @@ void Player::checkOutOfBounds()
 		m_didDoubleJump = false;
 		m_isTurboJumping = false;
 		m_isDownDashing = false;
+		m_shape.setOrigin({PlayerShapeRadius, PlayerShapeRadius});
 		if (m_shape.getFillColor() != PlayerColor)
 			m_shape.setFillColor(PlayerColor);
 		m_pos.y = lowLimit;
 	}
-}
-
-void Player::updateJumpLoadBar()
-{
-	if (!m_isLoadingTurboJump)
-	{
-		if (m_jumpLoadBar.getSize().x > 0)
-			m_jumpLoadBar.setSize({0, m_jumpLoadBar.getSize().y});
-		if (m_jumpLoadBar.getFillColor() != sf::Color::Red)
-			m_jumpLoadBar.setFillColor(sf::Color::Red);
-		return;
-	}
-
-	float loadBarMaxLength = 200.f;
-	float barLength = (m_turboJumpLoadClock.getElapsedTime().asSeconds() / TurboJumpLoadTime) * loadBarMaxLength;
-	if (barLength >= loadBarMaxLength)
-	{
-		barLength = loadBarMaxLength;
-		m_jumpLoadBar.setFillColor(sf::Color::Green);
-	}
-	m_jumpLoadBar.setSize({barLength, m_jumpLoadBar.getLocalBounds().height});
 }
 
 bool Player::handleTurboJump(float dt, InputData& inputData)
@@ -73,7 +54,7 @@ bool Player::handleTurboJump(float dt, InputData& inputData)
 	if (m_isTurboJumping)
 		return false;
 
-	if (inputData.m_wPress && !m_isLoadingTurboJump && !m_isJumping)
+	if (inputData.m_wPress && !m_isLoadingTurboJump && !m_isJumping && (!inputData.m_left && !inputData.m_right))
 	{
 		inputData.m_wHold = true;
 		m_turboJumpLoadClock.restart();
@@ -87,12 +68,13 @@ bool Player::handleTurboJump(float dt, InputData& inputData)
 		m_isLoadingTurboJump = false;
 		m_velocity.y = TurboJumpPower;
 		m_turboJumpEffectClock.restart();
-		m_shape.setFillColor(PlayerDashColor);
+		m_shape.setRadius(PlayerShapeRadius);
 		return true;
 	}
-	else if (m_isLoadingTurboJump && !inputData.m_wHold)
+	else if (m_isLoadingTurboJump && !inputData.m_wHold || (inputData.m_left || inputData.m_right))
 	{
 		m_isLoadingTurboJump = false;
+		m_shape.setRadius(PlayerShapeRadius);
 	}
 
 	return false;
@@ -111,7 +93,6 @@ void Player::handleJump(float dt, InputData& inputData)
 		m_isTurboJumping = false;
 		m_isJumping = true;
 		m_velocity.y = 0;
-		m_shape.setFillColor(PlayerColor);
 	}
 
 	if (!m_isJumping && !m_isTurboJumping && !m_isLoadingTurboJump && inputData.m_up)
@@ -146,6 +127,17 @@ bool Player::checkCanDash(InputData& inputData)
 	return false;
 }
 
+bool Player::checkCanDownDash(InputData& inputData)
+{
+	if (m_dashCooldownClock.getElapsedTime().asSeconds() < PlayerDashCooldown)
+		return false;
+
+	if (m_isJumping && inputData.m_down)
+		return true;
+
+	return false;
+}
+
 void Player::handleDash(float dt, InputData& inputData)
 {
 	if (m_isDashing && m_dashEffectClock.getElapsedTime().asSeconds() > PlayerDashTime)
@@ -159,9 +151,10 @@ void Player::handleDash(float dt, InputData& inputData)
 	if (m_isDashing || m_isDownDashing)
 		return ;
 
-	if (m_isJumping && inputData.m_down)
+	if (checkCanDownDash(inputData))
 	{
 		m_isDownDashing = true;
+		m_dashCooldownClock.restart();
 		m_shape.setFillColor(PlayerDashColor);
 		m_velocity.y = PlayerDashSpeed;
 	}
@@ -191,7 +184,6 @@ void Player::handleMovement(float deltaTime, InputData& inputData)
 
 	handleDash(deltaTime, inputData);
 	handleJump(deltaTime, inputData);
-	updateJumpLoadBar();
 	if (!m_isJumping && !m_isDownDashing && !m_isTurboJumping)
 	{
 		m_velocity.y = 0;
@@ -204,13 +196,42 @@ void Player::handleMovement(float deltaTime, InputData& inputData)
 	m_shape.setPosition(m_pos);
 }
 
+void Player::updateJumpLoadBar()
+{
+	if (!isLoadingTurboJump())
+	{
+		if (m_jumpLoadBar.getSize().x > 0)
+			m_jumpLoadBar.setSize({0, m_jumpLoadBar.getSize().y});
+		if (m_jumpLoadBar.getFillColor() != sf::Color::Red)
+			m_jumpLoadBar.setFillColor(sf::Color::Red);
+		return;
+	}
+
+	float barLength = (getTurboJumpLoadTime() / TurboJumpLoadTime) * TurboJumpBarLength;
+	if (barLength >= TurboJumpBarLength)
+	{
+		barLength = TurboJumpBarLength;
+		m_jumpLoadBar.setFillColor(sf::Color::Green);
+	}
+	m_jumpLoadBar.setSize({barLength, m_jumpLoadBar.getLocalBounds().height});
+	m_jumpLoadBar.setPosition({m_pos.x - TurboJumpBarLength / 2, m_pos.y - m_shape.getRadius() - m_jumpLoadBar.getSize().y - 15.f});
+
+}
+
 void Player::update(float deltaTime, InputData& inputData)
 {
 	handleMovement(deltaTime, inputData);
+	updateJumpLoadBar();
+
+	if (m_dashCooldownClock.getElapsedTime().asSeconds() > PlayerDashCooldown)
+		m_shape.setOutlineThickness(3.f);
+	else
+		m_shape.setOutlineThickness(0.f);
+
 }
 
 void Player::draw(sf::RenderTarget &target) const
 {
-	target.draw(m_shape);
 	target.draw(m_jumpLoadBar);
+	target.draw(m_shape);
 }

@@ -3,7 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include "InputHandler.h"
 #include "Constants.h"
-
+#include "PlayerStatsInfoBox.h"
 
 class Game;
 
@@ -17,15 +17,19 @@ class Player
 	void draw(sf::RenderTarget &target) const;
 	void update(float deltaTime, InputData& inputData);
 
+	bool isLoadingTurboJump() { return m_isLoadingTurboJump; };
+	float getTurboJumpLoadTime() { return m_turboJumpLoadClock.getElapsedTime().asSeconds(); }; 
+
 	private:
 
 	void handleMovement(float deltaTime, InputData& inputData);
 	void handleJump(float dt, InputData& inputData);
 	bool handleTurboJump(float dt, InputData& inputData);
-	void updateJumpLoadBar();
 	void handleDash(float dt, InputData& inputData);
-	bool checkCanDash(InputData& inputData);
+	bool checkCanDash(InputData& inputData);	
+	bool checkCanDownDash(InputData& inputData);
 	void checkOutOfBounds();
+	void updateJumpLoadBar();
 
 	sf::CircleShape m_shape;
 	sf::Vector2f m_pos;
@@ -46,6 +50,8 @@ class Player
 	sf::Clock m_dashCooldownClock;
 	sf::Clock m_turboJumpLoadClock;
 	sf::Clock m_turboJumpEffectClock;
+
+//	PlayerStatsInfoBox m_infoBox;
 	sf::RectangleShape m_jumpLoadBar;
 
 };
