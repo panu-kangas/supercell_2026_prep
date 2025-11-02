@@ -54,27 +54,25 @@ bool Player::handleTurboJump(float dt, InputData& inputData)
 	if (m_isTurboJumping)
 		return false;
 
-	if (inputData.m_wPress && !m_isLoadingTurboJump && !m_isJumping && (!inputData.m_left && !inputData.m_right))
+	if (inputData.m_down && !m_isLoadingTurboJump && !m_isJumping)
 	{
-		inputData.m_wHold = true;
+		inputData.m_downHold = true;
 		m_turboJumpLoadClock.restart();
 		m_isLoadingTurboJump = true;
 		return true;
 	}
 	
-	if (m_isLoadingTurboJump && m_turboJumpLoadClock.getElapsedTime().asSeconds() > TurboJumpLoadTime && inputData.m_wHold)
+	if (m_isLoadingTurboJump && m_turboJumpLoadClock.getElapsedTime().asSeconds() > TurboJumpLoadTime && inputData.m_downHold)
 	{
 		m_isTurboJumping = true;
 		m_isLoadingTurboJump = false;
 		m_velocity.y = TurboJumpPower;
 		m_turboJumpEffectClock.restart();
-		m_shape.setRadius(PlayerShapeRadius);
 		return true;
 	}
-	else if (m_isLoadingTurboJump && !inputData.m_wHold || (inputData.m_left || inputData.m_right))
+	else if (m_isLoadingTurboJump && !inputData.m_downHold)
 	{
 		m_isLoadingTurboJump = false;
-		m_shape.setRadius(PlayerShapeRadius);
 	}
 
 	return false;
@@ -92,7 +90,7 @@ void Player::handleJump(float dt, InputData& inputData)
 	{
 		m_isTurboJumping = false;
 		m_isJumping = true;
-		m_velocity.y = 0;
+		m_velocity.y = PlayerJumpPower;
 	}
 
 	if (!m_isJumping && !m_isTurboJumping && !m_isLoadingTurboJump && inputData.m_up)
@@ -101,7 +99,7 @@ void Player::handleJump(float dt, InputData& inputData)
 		m_velocity.y = PlayerJumpPower;
 		inputData.m_upHold = true;
 	}
-	else if (!m_didDoubleJump && m_isJumping && inputData.m_up && !inputData.m_upHold)
+	else if (!m_didDoubleJump && m_isJumping && m_velocity.y > PlayerJumpPower / 2 && inputData.m_up && !inputData.m_upHold)
 	{
 		m_didDoubleJump = true;
 		m_velocity.y = PlayerJumpPower;
@@ -129,10 +127,10 @@ bool Player::checkCanDash(InputData& inputData)
 
 bool Player::checkCanDownDash(InputData& inputData)
 {
-	if (m_dashCooldownClock.getElapsedTime().asSeconds() < PlayerDashCooldown)
+	if (m_pos.y > DownDashMinHeight)
 		return false;
 
-	if (m_isJumping && inputData.m_down)
+	if (m_isJumping && inputData.m_down && !inputData.m_downHold)
 		return true;
 
 	return false;
@@ -154,7 +152,6 @@ void Player::handleDash(float dt, InputData& inputData)
 	if (checkCanDownDash(inputData))
 	{
 		m_isDownDashing = true;
-		m_dashCooldownClock.restart();
 		m_shape.setFillColor(PlayerDashColor);
 		m_velocity.y = PlayerDashSpeed;
 	}
@@ -173,7 +170,7 @@ void Player::handleDash(float dt, InputData& inputData)
 
 void Player::handleMovement(float deltaTime, InputData& inputData)
 {
-	if ((inputData.m_left || inputData.m_right) && !m_isDownDashing && !m_isDashing)
+	if ((inputData.m_left || inputData.m_right) && !m_isDownDashing && !m_isDashing && !m_isLoadingTurboJump)
 	{
 		m_velocity.x = ((-1 * inputData.m_left) + inputData.m_right) * m_speed;
 	}
