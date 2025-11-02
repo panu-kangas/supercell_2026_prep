@@ -11,10 +11,10 @@
 
 # Controls
 
-   LEFT & RIGHT - Move
-   UP - Jump
-   UP (mid air) - Double jump
-   DOWN (mid air) - Down Dash
-   E + LEFT or RIGHT - Dash
+   LEFT & RIGHT - Move  
+   UP - Jump  
+   UP (mid air) - Double jump  
+   DOWN (mid air) - Down Dash  
+   E + LEFT or RIGHT - Dash  
    
    
