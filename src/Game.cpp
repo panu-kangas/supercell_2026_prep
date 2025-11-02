@@ -10,11 +10,10 @@
 
 
 Game::Game(sf::RenderWindow& window) :
-    m_state(State::START_SCREEN),
 	m_window(window),
     m_pPlayer(std::make_unique<Player>(this))
-
 {
+	m_pStateHandler = std::make_unique<GameStateHandler>(this);
     m_pGameInput = std::make_unique<GameInput>(this, m_pPlayer.get());
 	m_pPlatformHandler = std::make_unique<PlatformHandler>(this);
 }
@@ -39,6 +38,10 @@ bool Game::initialise()
 	m_floor.setSize({ScreenWidth, FloorLevel});
 	m_floor.setPosition({0, ScreenHeight - m_floor.getSize().y});
 	m_floor.setFillColor(FloorColor);
+
+	m_endZone.setSize({50.f, ScreenHeight});
+	m_endZone.setPosition(0, 0);
+	m_endZone.setFillColor(sf::Color::Red);
     
 
     return true;
@@ -53,43 +56,86 @@ void Game::resetGame()
 void Game::update(float deltaTime)
 {
     
-	m_pPlayer->update(deltaTime, getInputData());
-
-	m_pPlatformHandler->update(deltaTime);
-	m_pPlatformHandler->checkPlayerCollision(m_pPlayer.get());
-
-	handleCameraShake();
-
-	/*switch (m_state)
+	switch (m_state)
     {
 		case State::START_SCREEN:
 		{
-			
+			m_pStateHandler->update(deltaTime, getInputData());
+			if (m_pStateHandler->isStateReady())
+			{
+				m_state = State::INTRO;
+				m_pStateHandler->setNextState();
+			}
 			break ;
 		}
             
-        case State::ACTIVE:
+        case State::INTRO:
         {
-			
+			m_pStateHandler->update(deltaTime, getInputData());
+			if (m_pStateHandler->isStateReady())
+			{
+				m_state = State::RUN;
+				m_pStateHandler->setNextState();
+			}
 			break ;
         }
 
-		case State::GAME_OVER:
+		case State::RUN:
+        {
+			m_pPlayer->update(deltaTime, getInputData());
+
+			m_pPlatformHandler->update(deltaTime);
+			m_pPlatformHandler->checkPlayerCollision(m_pPlayer.get());
+
+			handleCameraShake();
+			break ;
+        }
+
+		case State::END_SCREEN:
 		{
 			
 			break ;
 		}
 
         break;
-    } */
+    } 
 
 }
 
 void Game::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
-	target.draw(m_floor);
-	m_pPlatformHandler->draw(target);
-	m_pPlayer->draw(target);
+
+	switch (m_state)
+    {
+		case State::START_SCREEN:
+		{
+			m_pStateHandler->draw(target);
+			break ;
+		}
+            
+        case State::INTRO:
+        {
+			m_pStateHandler->draw(target);
+			break ;
+        }
+
+		case State::RUN:
+        {
+			target.draw(m_endZone);
+			target.draw(m_floor);
+			m_pPlatformHandler->draw(target);
+			m_pPlayer->draw(target);
+			break ;
+        }
+
+		case State::END_SCREEN:
+		{
+			
+			break ;
+		}
+
+        break;
+    } 
 
 }
 

@@ -32,7 +32,7 @@ void Player::setPlayerGrounded(float posY, bool isOnPlatform, int platformIdx)
 	m_isTurboJumping = false;
 	m_isDownDashing = false;
 	m_platformCollision = false;
-	if (m_shape.getFillColor() != PlayerColor)
+	if (m_shape.getFillColor() != PlayerColor && !m_isDashing)
 		m_shape.setFillColor(PlayerColor);
 
 	m_pos.y = posY;
@@ -170,11 +170,11 @@ void Player::handleDash(float dt, InputData& inputData)
 	else if (checkCanDash(inputData))
 	{
 		inputData.m_eHold = true;
-		m_dashCooldownClock.restart();
 		m_shape.setFillColor(PlayerDashColor);
 		m_isDashing = true;
 		m_velocity.x = m_velocity.x > 0 ? PlayerDashSpeed : PlayerDashSpeed * -1;
 		m_velocity.y = 0;
+		m_dashCooldownClock.restart();
 		m_dashEffectClock.restart();
 	}
 }
@@ -201,7 +201,7 @@ void Player::handleMovement(float deltaTime, InputData& inputData)
 		m_velocity.x = 0;
 	}
 
-	if (m_curPlatformIdx != -1)
+	if (m_curPlatformIdx != -1 && !m_isDashing)
 	{
 		m_velocity.x += m_gamePtr->getPlatformVec()[m_curPlatformIdx].getSpeed();
 	}

@@ -29,6 +29,7 @@ class Player
 	sf::CircleShape& getShape() { return m_shape; };
 	sf::Vector2f getPrevPos() { return m_prevPos; };
 	sf::Vector2f getCurPos() { return m_pos; };
+	bool getIsDownDashing() { return m_isDownDashing; };
 	void setPlayerGrounded(float posY, bool isOnPlatform = false, int platformIdx = -1);
 
 	private:

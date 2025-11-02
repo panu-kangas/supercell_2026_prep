@@ -6,22 +6,16 @@
 #include "Constants.h"
 #include "InputHandler.h"
 #include "PlatformHandler.h"
-
+#include "GameStateHandler.h"
 
 class Player;
+class GameStateBase;
 
 namespace sf { class Clock; }
 
 class Game : public sf::Drawable
 {
 public:
-    
-    enum class State
-    {
-		START_SCREEN,
-        ACTIVE,
-		GAME_OVER
-    };
     
     Game() = delete;
 	Game(sf::RenderWindow& window);
@@ -31,9 +25,6 @@ public:
     void update(float deltaTime);
     void resetGame();
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
-
-    State getState() const { return m_state; }
-	void setState(State newState) { m_state = newState; };
 
     void onKeyPressed(sf::Keyboard::Key key);
     void onKeyReleased(sf::Keyboard::Key key);
@@ -51,14 +42,15 @@ private:
 	void handleCameraShake();
 
 	sf::RenderWindow& m_window;
+	State m_state{State::START_SCREEN};
 
-    State m_state;
-
+	std::unique_ptr<GameStateHandler> m_pStateHandler;
     std::unique_ptr<GameInput> m_pGameInput;
 	std::unique_ptr<Player> m_pPlayer;
 	std::unique_ptr<PlatformHandler> m_pPlatformHandler;
 
 	sf::RectangleShape m_floor;
+	sf::RectangleShape m_endZone;
     sf::Font m_font;
 
 	bool m_isCameraShaking = false;

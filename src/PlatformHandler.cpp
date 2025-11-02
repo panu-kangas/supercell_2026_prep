@@ -73,13 +73,13 @@ void PlatformHandler::resolvePlayerCollison(int idx, Player* player)
 			player->setIsJumping(true); // Player is affected by gravity
 
 		}
-		else if (playerPrevLeft > platformRight)
+		else if (playerPrevLeft > platformRight && !player->getIsDownDashing())
 		{
 			player->setPosition({platformRight + PlayerShapeRadius, player->getCurPos().y});
 			player->setPlatformCollision(true);
 			player->setVelocity({20, 0});
 		}
-		else if (playerPrevRight < platformLeft)
+		else if (playerPrevRight < platformLeft && !player->getIsDownDashing())
 		{
 			player->setPosition({platformLeft - PlayerShapeRadius, player->getCurPos().y});
 			player->setPlatformCollision(true);
