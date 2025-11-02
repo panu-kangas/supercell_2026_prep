@@ -15,7 +15,7 @@
    UP - Jump  
    UP (mid air) - Double jump  
    DOWN (mid air) - Down Dash  
-   W (hold on ground) - Power Jump
+   DOWN (hold on ground) - Power Jump
    E + LEFT or RIGHT - Side Dash  
    
    
