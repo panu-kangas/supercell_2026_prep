@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
 	window.setVerticalSyncEnabled(true);
 	window.setFramerateLimit(60);
     
-    std::unique_ptr<Game> pGame = std::make_unique<Game>();
+    std::unique_ptr<Game> pGame = std::make_unique<Game>(window);
     if (!pGame->initialise())
     {
         std::cerr << "Game Failed to initialise" << std::endl;

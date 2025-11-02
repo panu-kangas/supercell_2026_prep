@@ -18,23 +18,27 @@ void GameInput::onKeyPressed(sf::Keyboard::Key key)
 {
     if (key == sf::Keyboard::Up)
     {
-        m_inputData.m_movingUp = true;
+        m_inputData.m_up = true;
     }
     else if (key == sf::Keyboard::Down)
     {
-        m_inputData.m_movingDown = true;
+        m_inputData.m_down = true;
     }
     else if (key == sf::Keyboard::Left)
     {
-        m_inputData.m_movingLeft = true;
+        m_inputData.m_left = true;
     }
     else if (key == sf::Keyboard::Right)
     {
-        m_inputData.m_movingRight = true;
+        m_inputData.m_right = true;
     }
-    else if (key == sf::Keyboard::Space)
+    else if (key == sf::Keyboard::E)
     {
-        m_inputData.m_space = true;
+        m_inputData.m_ePress = true;
+    }
+	else if (key == sf::Keyboard::W)
+    {
+        m_inputData.m_wPress = true;
     }
 	else if (key == sf::Keyboard::Enter)
     {
@@ -47,26 +51,31 @@ void GameInput::onKeyReleased(sf::Keyboard::Key key)
 {
     if (key == sf::Keyboard::Up)
     {
-        m_inputData.m_movingUp = false;
+        m_inputData.m_up = false;
 		m_inputData.m_upHold = false;
     }
     else if (key == sf::Keyboard::Down)
     {
-        m_inputData.m_movingDown = false;
+        m_inputData.m_down = false;
 		m_inputData.m_downHold = false;
     }
     else if (key == sf::Keyboard::Left)
     {
-        m_inputData.m_movingLeft = false;
+        m_inputData.m_left = false;
     }
     else if (key == sf::Keyboard::Right)
     {
-        m_inputData.m_movingRight = false;
+        m_inputData.m_right = false;
     }
-    else if (key == sf::Keyboard::Space)
+    else if (key == sf::Keyboard::E)
     {
-        m_inputData.m_space = false;
-		m_inputData.m_spaceHold = false;
+        m_inputData.m_ePress = false;
+		m_inputData.m_eHold = false;
+    }
+	else if (key == sf::Keyboard::W)
+    {
+        m_inputData.m_wPress = false;
+		m_inputData.m_wHold = false;
     }
 	else if (key == sf::Keyboard::Enter)
     {
@@ -82,7 +91,7 @@ bool GameInput::isEnterPressed()
 
 bool GameInput::isDownPressed()
 {
-	if (m_inputData.m_movingDown && !m_inputData.m_downHold)
+	if (m_inputData.m_down && !m_inputData.m_downHold)
 	{
 		m_inputData.m_downHold = true;
 		return true;
@@ -93,7 +102,7 @@ bool GameInput::isDownPressed()
 
 bool GameInput::isUpPressed()
 {
-	if (m_inputData.m_movingUp && !m_inputData.m_upHold)
+	if (m_inputData.m_up && !m_inputData.m_upHold)
 	{
 		m_inputData.m_upHold = true;
 		return true;

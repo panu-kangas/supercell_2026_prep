@@ -22,7 +22,8 @@ public:
 		GAME_OVER
     };
     
-    Game();
+    Game() = delete;
+	Game(sf::RenderWindow& window);
     ~Game();
     
     bool initialise();
@@ -36,11 +37,18 @@ public:
     void onKeyPressed(sf::Keyboard::Key key);
     void onKeyReleased(sf::Keyboard::Key key);
 
+	void activateCameraShake() { m_isCameraShaking = true; };
+
 	sf::Font* getFont() { return &m_font; }
 	InputData& getInputData() { return m_pGameInput->getInputData(); };
 	float getFloorY() {return m_floor.getPosition().y; };
+	sf::RenderWindow& getWindow() { return m_window; };
 
 private:
+
+	void handleCameraShake();
+
+	sf::RenderWindow& m_window;
 
     State m_state;
 
@@ -48,7 +56,14 @@ private:
 	std::unique_ptr<Player> m_pPlayer;
 
 	sf::RectangleShape m_floor;
-
     sf::Font m_font;
+
+	bool m_isCameraShaking = false;
+	std::vector<sf::Vector2f> m_shakeOffsets = {
+		{4, 4}, {-4, -4}, {4, -4}, {-4, 4},
+		{4, 4}, {-4, -4}, {4, -4}, {-4, 4}
+	};
+	int m_shakeIdx = 0;
+
 
 };

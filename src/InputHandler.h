@@ -8,18 +8,20 @@ class Game;
 
 struct InputData
 {
-    bool m_movingUp = false;
+    bool m_up = false;
 	bool m_upHold = false;
-    bool m_movingDown = false;
+    bool m_down = false;
 	bool m_downHold = false;
-    bool m_movingLeft = false;
-    bool m_movingRight = false;
+    bool m_left = false;
+    bool m_right = false;
 	bool m_enter = false;
 	bool m_enterHold = false;
-    bool m_space = false;
-    bool m_spaceHold = false;
+    bool m_ePress = false;
+    bool m_eHold = false;
+	bool m_wPress = false;
+    bool m_wHold = false;
 
-    bool hasInputs() { return m_movingUp || m_movingDown || m_movingLeft || m_movingRight || m_space || m_enter;}
+    bool hasInputs() { return m_up || m_down || m_left || m_right || m_ePress || m_wPress || m_enter;}
 };
 
 class GameInput
@@ -41,4 +43,6 @@ private:
     Game* m_pGame;
     Player* m_pPlayer;
 	sf::Clock m_enterClock;
+
+
 };
